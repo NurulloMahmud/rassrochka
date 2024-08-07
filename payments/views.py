@@ -109,3 +109,14 @@ class TransactionPaymentView(APIView):
 
         return Response({'message': 'Payment created successfully.'}, status=201)
 
+class TransactionDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        transaction_obj = Transaction.objects.filter(pk=pk, item__user=self.request.user).first()
+        if not transaction_obj:
+            return Response({'error': 'Transaction not found.'}, status=404)
+        
+        transaction_obj.delete()
+        return Response({'message': 'Transaction deleted successfully.'}, status=200)
+
