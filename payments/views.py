@@ -9,7 +9,7 @@ from .serializers import (
     TransactionViewSerializer
 )
 from .models import (
-    Transaction, TransactionStatus, PaymentPLan
+    Transaction, TransactionStatus, Payment
 )
 
 from .utils import (
@@ -31,12 +31,10 @@ class TransactionCreateView(APIView):
     def post(self, request):
         from users.models import Item
         # get payment plan fields
-        months = request.data.get('months')
-        weeks = request.data.get('weeks')
-        days = request.data.get('days')
-        payment_plan_obj = PaymentPLan.objects.get_or_create(
-            months=months, weeks=weeks, days=days
-        )[0]
+        months = request.data.get('months', 0)
+
+        if not months:
+            return Response({'error': 'Please provide all required fields.'}, status=400)
 
         item_id = request.data.get('item_id')
         status_obj = TransactionStatus.objects.get_or_create(name="In Process")[0]
@@ -63,20 +61,18 @@ class TransactionCreateView(APIView):
         today = datetime.today()
         today_str = today.strftime('%Y-%m-%d')
         next_due_date = get_next_month_same_day(today_str, 1)
-        
-        if payment_plan_obj.months:
-            next_due_date = get_next_month_same_day(today_str, int(payment_plan_obj.months))
-        elif payment_plan_obj.weeks:
-            next_due_date = get_next_week_same_day(today_str, int(payment_plan_obj.weeks))
-        elif payment_plan_obj.days:
-            next_due_date = get_next_day(today_str, int(payment_plan_obj.days))
+
+        if down_payment == total_amount:
+            next_due_date = None
+            debt = 0
+            status_obj = TransactionStatus.objects.get_or_create(name="Paid")[0]
 
         Transaction.objects.create(
             item=item_obj,
             customer_name=customer_name,
             customer_phone_number=customer_phone_number,
             total_amount=total_amount,
-            payment_plan=payment_plan_obj,
+            months=int(months),
             down_payment=down_payment,
             status=status_obj,
             debt=debt,
@@ -84,4 +80,32 @@ class TransactionCreateView(APIView):
         )
 
         return Response({'message': 'Transaction created successfully.'}, status=201)
+
+class TransactionPaymentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        transaction_obj = Transaction.objects.filter(pk=pk, item__user=self.request.user).first()
+        if not transaction_obj:
+            return Response({'error': 'Transaction not found.'}, status=404)
+        
+        payment_obj = Payment.objects.create(
+            transaction=transaction_obj,
+            amount=transaction_obj.installment_amount
+        )
+
+        last_payment_date = transaction_obj.next_due_date
+        last_payment_date_str = last_payment_date.strftime('%Y-%m-%d')
+        next_due_date = get_next_month_same_day(last_payment_date_str, 1)
+
+        if transaction_obj.debt == 0:
+            transaction_obj.status = TransactionStatus.objects.get_or_create(name="Paid")[0]
+            next_due_date = None
+            transaction_obj.debt = 0
+
+        transaction_obj.debt -= transaction_obj.installment_amount
+        transaction_obj.next_due_date = next_due_date
+        transaction_obj.save()
+
+        return Response({'message': 'Payment created successfully.'}, status=201)
 

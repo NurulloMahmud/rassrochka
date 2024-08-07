@@ -10,25 +10,6 @@ class TransactionStatus(models.Model):
     def __str__(self):
         return self.name
 
-class PaymentPLan(models.Model):
-    months = models.IntegerField(default=0)
-    weeks = models.IntegerField(default=0)
-    days = models.IntegerField(default=0)
-
-    def __str__(self):
-        return f'{self.months} months, {self.weeks} weeks, {self.days} days'
-
-    def save(self, *args, **kwargs):
-        if self.months == 0 and self.weeks == 0 and self.days == 0:
-            raise ValueError('Payment plan must have at least one period')
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = 'Payment Plan'
-        verbose_name_plural = 'Payment Plans'
-        db_table = 'payment_plans'
-        ordering = ['-id']
-
 class Transaction(models.Model):
     phone_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$',
@@ -39,7 +20,7 @@ class Transaction(models.Model):
     customer_name = models.CharField(max_length=100)
     customer_phone_number = models.CharField(validators=[phone_regex], max_length=17, unique=True, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_plan = models.ForeignKey(PaymentPLan, on_delete=models.CASCADE)
+    months = models.IntegerField(default=1)
     down_payment = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     status = models.ForeignKey(TransactionStatus, on_delete=models.CASCADE)
     debt = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -52,6 +33,7 @@ class Transaction(models.Model):
     
     def save(self, *args, **kwargs):
         self.debt = self.total_amount - self.down_payment
+        self.installment_amount = self.debt / self.months
         super().save(*args, **kwargs)
 
     class Meta:
