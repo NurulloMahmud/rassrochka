@@ -39,8 +39,7 @@ class Status(models.Model):
 class Item(models.Model):
     name = models.CharField(max_length=100)
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    monthly_price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
