@@ -37,7 +37,7 @@ class Transaction(models.Model):
 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=100)
-    customer_phone_number = models.CharField(max_length=20, unique=True)
+    customer_phone_number = models.CharField(validators=[phone_regex], max_length=17, unique=True, null=True, blank=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_plan = models.ForeignKey(PaymentPLan, on_delete=models.CASCADE)
     down_payment = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -45,6 +45,7 @@ class Transaction(models.Model):
     debt = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     next_due_date = models.DateField(null=True, blank=True)
     created_at = models.DateField(auto_now_add=True)
+    installment_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return self.item.name
@@ -82,3 +83,4 @@ class Payment(models.Model):
         db_table = 'payments'
         ordering = ['-id']
 
+ 

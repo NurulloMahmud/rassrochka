@@ -20,3 +20,4 @@ class ItemWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = '__all__'
+
