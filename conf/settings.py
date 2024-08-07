@@ -28,12 +28,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # custom
     'users',
+    'payments',
     # third party
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_yasg",
     "corsheaders",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -107,6 +114,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -117,3 +126,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
