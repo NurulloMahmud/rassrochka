@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     # custom
     'users',
     'payments',
+    'analytics',
     # third party
     "rest_framework",
     "rest_framework_simplejwt",
