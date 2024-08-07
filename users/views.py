@@ -75,7 +75,7 @@ class UserListAPIView(generics.ListAPIView):
 
 class ItemCreateAPIView(generics.CreateAPIView):
     queryset = Item.objects.all()
-    serializer_class = UserListSerializer
+    serializer_class = ItemWriteSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
