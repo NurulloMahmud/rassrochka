@@ -1,6 +1,14 @@
 from rest_framework.views import APIView
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 from rest_framework.response import Response
-from .models import CustomUser
+from .models import CustomUser, Item
+from .serializers import (
+    UserListSerializer, ItemViewSerializer, ItemWriteSerializer
+)
+from .permissions import IsSuperUser
+
 
 import re
 
@@ -58,5 +66,45 @@ class UserRegisterAPIView(APIView):
         user.email = email
         user.save()
 
-        return Response({'message': 'User created successfully.'}, status=201)
+        return Response({'message': 'User created successfully.'}, status=status.HTTP_201_CREATED)
+
+class UserListAPIView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserListSerializer
+    permission_classes = [IsAuthenticated, IsSuperUser]
+
+class ItemCreateAPIView(generics.CreateAPIView):
+    queryset = Item.objects.all()
+    serializer_class = UserListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class ItemListAPIView(generics.ListAPIView):
+    queryset = Item.objects.all()
+    serializer_class = ItemViewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Item.objects.filter(user=self.request.user)
+
+class ItemRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Item.objects.all()
+    serializer_class = ItemWriteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Item.objects.filter(user=self.request.user)
+
+    def perform_update(self, serializer):
+        obj = self.get_object()
+        if not self.request.user == obj.user:
+            raise PermissionError
+        serializer.save(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        if not self.request.user == instance.user:
+            raise PermissionError
+        instance.delete()
 
