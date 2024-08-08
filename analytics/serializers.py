@@ -10,7 +10,10 @@ class TransactionItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ActiveTransactionViewSerializer(serializers.ModelSerializer):
+    from payments.serializers import TransactionStatusSerializer
     item = TransactionItemSerializer()
+    status = TransactionStatusSerializer()
     class Meta:
         model = Transaction
         fields = '__all__'
+

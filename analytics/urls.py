@@ -1,4 +1,10 @@
 from django.urls import path
+from .views import (
+    ActiveTransactionListView
+)
 
 
-urlpatterns = []
+
+urlpatterns = [
+    path('transactions/active/', ActiveTransactionListView.as_view()),
+]
