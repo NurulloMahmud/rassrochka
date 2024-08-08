@@ -55,8 +55,8 @@ class Payment(models.Model):
         total_paid = sum(payment.amount for payment in transaction_payments)
         if total_paid + self.amount == self.transaction.total_amount:
             self.transaction.debt = 0
+            self.transaction.next_due_date = None
             self.transaction.save()
-            self.next_due_date = None
         super().save(*args, **kwargs)
 
     class Meta:
