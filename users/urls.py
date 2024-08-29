@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from django.urls import path
+from django.urls import path, include
 from .views import (
     UserRegisterAPIView, UserListAPIView, CustomTokenObtainPairView,
     ItemCreateAPIView, ItemListAPIView, ItemRetrieveUpdateDestroyView,
@@ -19,6 +19,7 @@ urlpatterns = [
     path('items/', ItemListAPIView.as_view()),
     path('items/create/', ItemCreateAPIView.as_view()),
     path('items/<int:pk>/', ItemRetrieveUpdateDestroyView.as_view()),
+    path('', include(router.urls)),
 
     # jwt
     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
