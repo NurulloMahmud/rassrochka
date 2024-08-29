@@ -1,13 +1,14 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.response import Response
-from .models import CustomUser, Item
+from .models import CustomUser, Item, Status
 from .serializers import (
     UserListSerializer, ItemViewSerializer, ItemWriteSerializer,
-    CustomTokenObtainPairSerializer
+    CustomTokenObtainPairSerializer, StatusSerializer
 )
 from .permissions import IsSuperUser
 
@@ -109,6 +110,11 @@ class ItemRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         if not self.request.user == instance.user:
             raise PermissionError
         instance.delete()
+
+class StatusViewSet(ModelViewSet):
+    queryset = Status.objects.all()
+    serializer_class = StatusSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

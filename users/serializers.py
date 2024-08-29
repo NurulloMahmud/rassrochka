@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from .models import CustomUser, Item
+from .models import CustomUser, Item, Status
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -38,4 +38,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         })
 
         return data
+
+class StatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Status
+        fields = '__all__'
 

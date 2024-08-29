@@ -1,12 +1,17 @@
+from rest_framework.routers import DefaultRouter
 from django.urls import path
 from .views import (
     UserRegisterAPIView, UserListAPIView, CustomTokenObtainPairView,
-    ItemCreateAPIView, ItemListAPIView, ItemRetrieveUpdateDestroyView
+    ItemCreateAPIView, ItemListAPIView, ItemRetrieveUpdateDestroyView,
+    StatusViewSet
 )
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+router = DefaultRouter()
+
+router.register('item/status', StatusViewSet)
 
 urlpatterns = [
     path('register/', UserRegisterAPIView.as_view()),
